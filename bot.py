@@ -1,3 +1,4 @@
+import html
 import json
 import os
 import time
@@ -29,6 +30,12 @@ Markdown belgilarini ishlatma.
 POST:
 """
 
+NOMLAR = {
+    "soliqnews": "Soliq xizmati (rasmiy)",
+    "Nurullo_Bobomuradov": "Nurullo Bobomuradov",
+    "Afzalraximov": "Afzal Raximov",
+}
+
 
 def qisqartir(matn):
     manzil = ("https://generativelanguage.googleapis.com/v1beta/models/"
@@ -43,19 +50,39 @@ def qisqartir(matn):
     return "".join(q.get("text", "") for q in qismlar if not q.get("thought")).strip()
 
 
-def yubor(matn):
+def bezat(xulosa, kanal):
+    qatorlar = []
+    for q in html.escape(xulosa[:3000], quote=False).split("\n"):
+        if q.startswith(("📌", "📝", "👤", "📅")) and ":" in q:
+            sarlavha, qolgani = q.split(":", 1)
+            q = "<b>" + sarlavha + ":</b>" + qolgani
+        qatorlar.append(q)
+    return ("🏛 <b>" + NOMLAR.get(kanal, kanal) + "</b>\n"
+            + "━━━━━━━━━━━━\n"
+            + "\n".join(qatorlar)
+            + "\n\n<i>ℹ️ Sun'iy intellekt qisqartirdi. "
+            + "Qo'llashdan oldin manbani tekshiring.</i>")
+
+
+def yubor(matn, havola):
     manzil = "https://api.telegram.org/bot" + TOKEN + "/sendMessage"
-    data = urllib.parse.urlencode({"chat_id": CHAT_ID, "text": matn}).encode()
+    tugma = {"inline_keyboard": [
+        [{"text": "📖 Asl postni o'qish", "url": havola}],
+        [{"text": "⚖️ Lex.uz", "url": "https://lex.uz"},
+         {"text": "🧾 Soliq.uz", "url": "https://soliq.uz"}]]}
+    data = urllib.parse.urlencode({
+        "chat_id": CHAT_ID, "text": matn, "parse_mode": "HTML",
+        "reply_markup": json.dumps(tugma)}).encode()
     urllib.request.urlopen(manzil, data=data, timeout=30)
-    time.sleep(1)
+    time.sleep(3)
 
 
 def postlarni_ol(kanal):
     sorov = urllib.request.Request(
         "https://t.me/s/" + kanal, headers={"User-Agent": "Mozilla/5.0"})
-    html = urllib.request.urlopen(sorov, timeout=30).read().decode("utf-8")
+    sahifa = urllib.request.urlopen(sorov, timeout=30).read().decode("utf-8")
     p = Postlar()
-    p.feed(html)
+    p.feed(sahifa)
     return p.postlar
 
 
@@ -78,7 +105,7 @@ for kanal in KANALLAR:
     for havola, matn in yangi:
         xulosa = qisqartir(matn)
         if xulosa and not xulosa.upper().startswith("SKIP"):
-            yubor(xulosa[:3500] + "\n\n🔗 Manba: " + havola)
+            yubor(bezat(xulosa, kanal), havola)
             soni += 1
         holat[kanal] = raqam(havola)
         with open(HOLAT, "w") as f:
