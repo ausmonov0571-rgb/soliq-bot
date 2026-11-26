@@ -21,8 +21,10 @@ Foydali bo'lsa, o'zbek tilida (lotin) sodda qilib yoz:
 📝 Qisqacha: 2-3 ta sodda gap
 👤 Kimga tegishli: ...
 📅 Muddat: ... (postda bo'lmasa, bu qatorni yozma)
-Postda yo'q raqam yoki sanani qo'shma. Bu loyiha yoki taklif bo'lsa, hali
-tasdiqlanmaganini ayt. Markdown belgilarini ishlatma.
+Postda yo'q raqam yoki sanani qo'shma. "Deyarli", "ayrim", "mumkin" kabi
+so'zlarni tushirib qoldirma. Bu loyiha yoki taklif bo'lsa, Mavzu oldiga
+(LOYIHA) deb yoz va Muddat qatorida "tasdiqlansa" so'zini ishlat.
+Markdown belgilarini ishlatma.
 
 POST:
 """
